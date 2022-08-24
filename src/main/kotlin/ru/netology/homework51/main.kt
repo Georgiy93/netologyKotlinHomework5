@@ -1,112 +1,124 @@
 package ru.netology.homework51
 
+import ru.netology.homework51.WallService.createSpecificPost
 import java.text.SimpleDateFormat
 
 data class Post(
-    val id: Int,
-    val ownerID: Int,
-    val data: Long,
-    val isFavorite: Boolean,
+    val id: Int = 0,
+    val ownerID: Int = 0,
+    val data: Long = 0,
+    val isFavorite: Boolean = false,
     val text: String,
-    val replyOwnerID: Int,
-    val replyPostID: Int,
-    val canEdit: Boolean,
-    val friendsOnly: Boolean,
-    val postType: String,
-    val likes: Likes
-) {
-    constructor() : this(
-        0, 1,
-        System.currentTimeMillis(),
-        false,
-        "Hello",
-        1,
-        1, true, false, "post",
-        Likes()
-    )
-}
+    val replyOwnerID: Int = 0,
+    val replyPostID: Int = 0,
+    val canEdit: Boolean = false,
+    val friendsOnly: Boolean = false,
+    val postType: String = "",
+    val likes: Likes = Likes()
+)
+
 
 data class Likes(
 
-    val count: Int,
-    val userLike: Boolean,
-    val canLike: Boolean,
-    val canPublish: Boolean
-) {
-    constructor() : this(
-        0,
-        false, true,
-        true
-    )
-}
+    val count: Int = 0,
+    val userLike: Boolean = false,
+    val canLike: Boolean = true,
+    val canPublish: Boolean = true
+)
 
 object WallService {
     private var posts = emptyArray<Post>()
     private var id = 1
     fun clear() {
         posts = emptyArray()
-       id=1
+        id = 1
     }
 
 
     //добавление в массив 1я задача
-    fun addInArray(post: Post): Array<Post> {
+    fun createSpecificPost(): Post = Post(
 
-        posts += add(post)
+        id = 0,
+
+        ownerID = 1,
+
+        data = System.currentTimeMillis(),
+
+        isFavorite = false,
+
+        text = "Hello",
+
+        replyOwnerID = 1,
+
+        replyPostID = 1,
+
+        canEdit = true,
+
+        friendsOnly = false,
+
+        postType = "post",
+
+        likes = Likes()
+
+    )
+
+    fun getAll(): Array<Post> {
 
         return posts
     }
 
 
-
-
     //добавление в массив 2я задача
     fun add(post: Post): Post {
 
-        posts += post.copy(id = id)
-
-        id++
+        posts += post.copy(id = id++)
 
         return posts.last()
 
     }
 
     fun update(post: Post): Boolean {
-        var result=false
         posts.withIndex().forEach {
 
             when (it.value.id) {
+
                 post.id -> {
-                    posts[it.index] = post
-                    result = true
+                    val old = posts[it.index]
+                    posts[it.index] = post.copy(ownerID = old.ownerID, data = old.data)
+
+                    return true
                 }
 
-                else -> result = false
+
+                else -> Unit
+
             }
 
         }
-        return result
+        return false
     }
 }
 
 fun main() {
     val like = Likes()
-    val post = Post()
-    val post1 = post.copy(likes = like.copy(count = like.count + 122, canPublish = false))
-    val post2 = post.copy(
+    val post = createSpecificPost()
+    var post1 = post.copy(likes = like.copy(count = like.count + 122, canPublish = false))
+    var post2 = post.copy(
         ownerID = 32, data = System.currentTimeMillis(), text = "Перерыв 10 минут!", friendsOnly = true,
         likes = like.copy(count = like.count + 141, canPublish = true)
     )
     val updatePost = post.copy(
-        3, ownerID = 32, data = System.currentTimeMillis(),
+        2, ownerID = 32, data = System.currentTimeMillis(),
         isFavorite = true, replyPostID = 2, replyOwnerID = 32,
         canEdit = true,
         text = "Перерыв 20 минут!", friendsOnly = true, postType = "suggest",
         likes = like.copy(count = like.count + 151, canPublish = true)
     )
 
-    WallService.addInArray(post1)
-    val array = WallService.addInArray(post2)
+    WallService.add(post1)
+    WallService.add(post2)
+
+    val array = WallService.getAll()
     WallService.update(updatePost)
     for (post in array) {
         var dataFormat = SimpleDateFormat("Дата поста: dd:MM:yy, время поста:  HH:mm:ss")
